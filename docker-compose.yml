@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  boutique-postgres-produits:
+    image: postgres:15
+    container_name: boutique-postgres-produits
+    environment:
+      POSTGRES_DB: produitsdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - produits-data:/var/lib/postgresql/data
+
+  boutique-postgres-avis:
+    image: postgres:15
+    container_name: boutique-postgres-avis
+    environment:
+      POSTGRES_DB: avisdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - avis-data:/var/lib/postgresql/data
+
+  boutique-redis:
+    image: redis:7
+    container_name: boutique-redis
+
+  boutique-eureka-server:
+    build: ./eureka-server
+    container_name: boutique-eureka-server
+    ports:
+      - "8761:8761"
+
+  boutique-produits-service:
+    build: ./produits-service
+    container_name: boutique-produits-service
+    ports:
+      - "8091:8091"
+    depends_on:
+      - boutique-postgres-produits
+      - boutique-redis
+      - boutique-eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://boutique-postgres-produits:5432/produitsdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATA_REDIS_HOST: boutique-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://boutique-eureka-server:8761/eureka/
+
+  boutique-avis-service:
+    build: ./avis-service
+    container_name: boutique-avis-service
+    ports:
+      - "8092:8092"
+    depends_on:
+      - boutique-postgres-avis
+      - boutique-eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://boutique-postgres-avis:5432/avisdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://boutique-eureka-server:8761/eureka/
+
+  boutique-api-gateway:
+    build: ./api-gateway
+    container_name: boutique-api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - boutique-eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://boutique-eureka-server:8761/eureka/
+
+volumes:
+  produits-data:
+  avis-data:

@@ -1,0 +1,18 @@
+# Java
+**/target/
+*.jar
+*.war
+
+# Node / React Native
+**/node_modules/
+.expo/
+dist/
+web-build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
