@@ -1,55 +1,59 @@
-# Projet Boutique - Architecture Microservices
+# Architecture Microservices E-commerce - Test Pratique
 
-Ce projet est une démonstration d'une architecture microservices utilisant Spring Boot 4, Spring Cloud (Eureka, Gateway, Feign), Docker Compose, et une application mobile Flutter.
+Ce projet implémente une architecture microservices complète pour une plateforme e-commerce simple, développée avec **Spring Boot**, **Docker**, et **React Native**.
 
 ## Structure du Projet
-
-- `eureka-server`: Serveur d'enregistrement (Port 8761)
-- `api-gateway`: Passerelle API (Port 8090)
-- `produits-service`: Gestion des produits et catégories (Port 8091)
-- `avis-service`: Gestion des avis clients (Port 8092)
-- `mobile_app`: Application mobile Flutter
-- `docker-compose.yml`: Orchestration des conteneurs
+- `eureka-server` : Service de découverte (Port 8761).
+- `api-gateway` : Passerelle API (Port 8090) gérant le routage et les CORS.
+- `produits-service` : Gestion des produits et catégories (Port 8091).
+- `avis-service` : Gestion des avis clients (Port 8092).
+- `mobile-app` : Frontend React Native (Expo) pour le web.
 
 ## Prérequis
+- Docker & Docker Compose
+- Java 17+
+- Node.js & npm
 
-- Docker et Docker Compose
-- Maven 3.9+
-- JDK 25
+## Lancement du Projet
 
-## Lancement du projet
-
-1. **Compiler les microservices** :
-   ```bash
-   mvn clean package -DskipTests -f eureka-server/pom.xml
-   mvn clean package -DskipTests -f api-gateway/pom.xml
-   mvn clean package -DskipTests -f produits-service/pom.xml
-   mvn clean package -DskipTests -f avis-service/pom.xml
-   ```
-
-2. **Démarrer avec Docker Compose** :
-   ```bash
-   docker-compose up --build
-   ```
-
-## Accès aux services
-
-- **API Gateway** : `http://localhost:8090`
-- **Eureka Dashboard** : `http://localhost:8761`
-- **Swagger Produits** : `http://localhost:8091/swagger-ui.html`
-- **Swagger Avis** : `http://localhost:8092/swagger-ui.html`
-
-## Tests
-
-### Tests Unitaires et Intégration (Spring Boot)
+### 1. Backend (Docker)
+Depuis la racine du projet :
 ```bash
-mvn test -f produits-service/pom.xml
+# Compiler les services Java
+cd produits-service && ./mvnw clean package -DskipTests && cd ..
+cd avis-service && ./mvnw clean package -DskipTests && cd ..
+cd eureka-server && ./mvnw clean package -DskipTests && cd ..
+cd api-gateway && ./mvnw clean package -DskipTests && cd ..
+
+# Lancer l'infrastructure
+docker-compose up -d --build
 ```
 
-### Tests E2E (Cypress)
-1. Installer Cypress : `npm install cypress --save-dev`
-2. Lancer les tests : `npx cypress run`
+### 2. Frontend (React Native Web)
+```bash
+cd mobile_app
+npm install
+npx expo start --web --port 8085
+```
+Accédez à l'application via `http://localhost:8085`.
 
-## Branches Git
-- `version1`: Parties 1 à 4 (Infrastructure et Services)
-- `version2`: Parties 5 et 6 (Mobile et Tests)
+## Tests (Branche version2)
+
+### Tests Unitaires et Intégration
+Dans `produits-service` :
+```bash
+./mvnw test
+```
+- `ProduitServiceTest` : Mockito pour la logique métier.
+- `ProduitRepositoryTest` : @DataJpaTest avec base H2.
+
+### Tests E2E (Cypress)
+Depuis la racine :
+```bash
+npm install cypress --save-dev
+npx cypress run
+```
+Les tests Cypress simulent le parcours : **Liste produits -> Détail produit -> Vérification des avis**.
+
+---
+*Auteur : Meryem El Heni*
